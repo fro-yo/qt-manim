@@ -1,0 +1,32 @@
+<1> TrimValidityPeriodNode: Filter out rows where '_valid_from' >= 2024-01-31T00:00:00+00:00 or '_valid_to' <= 2024-01-01T00:00:00+00:00. If '_valid_from < 2024-01-01T00:00:00+00:00, set it to 2024-01-01T00:00:00+00:00. If '_valid_to > 2024-01-31T00:00:00+00:00 or '_valid_to' is null, set it to 2024-01-31T00:00:00+00:00.
+└── <2> DeriveValidityPeriodNode: Derive the 'valid_from' and 'valid_to' columns for each feature value.
+    └── <3> TakeLastRowNode: Take last row, partition by (('user_id', '_effective_timestamp')), order by (timestamp) descending
+        └── <4> AddEffectiveTimestampNode: Add effective timestamp column '_effective_timestamp' that is equal to window('timestamp', batch_schedule).end where batch_schedule = 86400 seconds.
+            └── <5> RenameColsNode: Drop columns ['_anchor_time'].
+                └── <6> AddDurationNode: Add 1 day to '_anchor_time' as new column 'timestamp'
+                    └── <7> ConvertEpochToTimestampNode: Convert columns ['_anchor_time'] from epoch (either seconds or ns) to timestamp.
+                        └── <8> RespectFeatureStartTimeNode: Respect the feature start time for all rows where '_anchor_time' < 2010-01-31T00:00:00+00:00 by setting all feature columns for those rows to NULL
+                            └── <9> AsofJoinFullAggNode(spine, partial_aggregates): Events asof join partial aggregates, where the join condition is partial_aggregates._anchor_time <= events._anchor_time and partial aggregates are rolled up to compute full aggregates
+                                ├── <10> [spine] ExplodeTimestampByTimeWindowsNode: Explode the '_anchor_time' column for each time window, each with a new timestamp that is the sum of the timestamp and the time window.
+                                │   └── <11> RenameColsNode: Drop columns ['sum_amount'].
+                                │       └── <12> JoinNode(left, right): Right join on ['user_id']:
+                                │           ├── <13> [left] PartialAggNode: Perform partial aggregations with column '_anchor_time' as the start time of tiles.
+                                │           │   └── <14> StagingNode: Staging data for test_fv_73a7ab0e
+                                │           │       └── <15> FeatureTimeFilterNode: Apply time range filter [2023-09-23T00:00:00+00:00, 2024-01-31T00:00:00+00:00) to column 'timestamp'
+                                │           │           └── <16> ConvertTimestampToUTCNode: Convert 'timestamp' to UTC
+                                │           │               └── <17> FeatureViewPipelineNode(transactions_batch): Evaluate feature view pipeline 'test_fv' with feature time limits [2023-09-23T00:00:00+00:00, 2024-01-31T00:00:00+00:00)
+                                │           │                   └── <18> [transactions_batch] StagingNode: Staging data for customers_0cbf1f2f
+                                │           │                       └── <19> DataSourceScanNode: Scan data source 'customers'. WARNING: there is no time range filter so all rows will be returned. This can be very inefficient.
+                                │           └── <20> [right] SelectDistinctNode: Select distinct with columns ['user_id'].
+                                │               └── <21> UserSpecifiedDataNode: User provided data with columns user_id
+                                └── <22> [partial_aggregates] JoinNode(left, right): Right join on ['user_id']:
+                                    ├── <23> [left] PartialAggNode: Perform partial aggregations with column '_anchor_time' as the start time of tiles.
+                                    │   └── <24> StagingNode: Staging data for test_fv_73a7ab0e
+                                    │       └── <25> FeatureTimeFilterNode: Apply time range filter [2023-09-23T00:00:00+00:00, 2024-01-31T00:00:00+00:00) to column 'timestamp'
+                                    │           └── <26> ConvertTimestampToUTCNode: Convert 'timestamp' to UTC
+                                    │               └── <27> FeatureViewPipelineNode(transactions_batch): Evaluate feature view pipeline 'test_fv' with feature time limits [2023-09-23T00:00:00+00:00, 2024-01-31T00:00:00+00:00)
+                                    │                   └── <28> [transactions_batch] StagingNode: Staging data for customers_0cbf1f2f
+                                    │                       └── <29> DataSourceScanNode: Scan data source 'customers'. WARNING: there is no time range filter so all rows will be returned. This can be very inefficient.
+                                    └── <30> [right] SelectDistinctNode: Select distinct with columns ['user_id'].
+                                        └── <31> UserSpecifiedDataNode: User provided data with columns user_id
+
