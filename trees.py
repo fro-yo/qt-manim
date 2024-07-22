@@ -98,6 +98,9 @@ class NodeWithTables(Scene):
             FadeOut(mat),
             FadeOut(hl),
         )
+        ##################### OL ##################################################
+
+        self.from_source = VGroup(*self.all_arrows, *self.all_nodes_and_labels)
 
         ##################### SPINE ##################################################
 
@@ -108,7 +111,7 @@ class NodeWithTables(Scene):
         )
 
 
-        self.wait(2)
+        self.wait(3)
         user_data_node = self.name_to_node["FeatureTimeFilter"].copy()
         user_data_node.shift(UP*2)
         user_data_label = Text("User Data", font='menlo', font_size=12, color=BLACK).next_to(user_data_node, DOWN, buff=0.4)
@@ -155,6 +158,25 @@ class NodeWithTables(Scene):
 
 
         feature_time_filter_node, label, arrow = self.create_node("FeatureStartTime", full_agg, 0.9)
+        ################## Offline Store Scan Label #########################################
+
+        offline_scan = self.name_to_node["AddAnchorTime"].copy()
+        label = Text("OfflineStoreScan", font='menlo', font_size=12, color=BLACK).next_to(offline_scan, DOWN, buff=0.4).scale(0.9)
+
+        self.wait(2)
+        self.play(
+            FadeOut(self.from_source),
+            FadeIn(offline_scan),
+            FadeIn(label),
+        )
+
+        self.wait(3)
+        self.play(
+            FadeIn(self.from_source),
+            FadeOut(offline_scan),
+            FadeOut(label),
+        )
+        
         
         ################## GFFE Label #########################################
         hl = SurroundingRectangle(self.all_nodes_and_labels, color=MAROON, buff=0.1)

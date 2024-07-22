@@ -27,7 +27,12 @@ class NodeWithTables(Scene):
 
         # Create the left table (4x4)
         left_table = Table(
-            [[str(random.randint(0,100))] * 3 for _ in range(4)],
+            [
+                ["2024-07-01 1:00", "user_1", "50"],
+                ["2024-07-04 3:00", "user_1", "190"],
+                ["2024-07-08 4:00", "user_1", "20"],
+                ["2024-07-11 1:00", "user_1", "800"],
+            ],
             include_outer_lines=True,
             color=BLACK,
             line_config=l_config,
@@ -38,21 +43,34 @@ class NodeWithTables(Scene):
 
         # Create the right tables (3 small tables)
         anchor_time = Table(
-            [[str(random.randint(0,100))] * 4 for _ in range(4)], 
+            [
+                ["2024-07-01 1:00", "2024-07-01 1:00", "user_1", "50"],
+                ["2024-07-04 3:00", "2024-07-04 3:00", "user_1", "190"],
+                ["2024-07-08 4:00", "2024-07-08 4:00", "user_1", "20"],
+                ["2024-07-11 1:00", "2024-07-11 1:00", "user_1", "800"],
+            ],
             include_outer_lines=True, 
             color=BLACK,
             line_config=l_config,
-            col_labels=[Text("timestamp"), Text("user_id"), Text("amount"), Text("anchor_time")],
-        ).scale(0.25)
+            col_labels=[Text("timestamp"), Text("anchor_time"), Text("user_id"), Text("amount")],
+        ).scale(0.2)
         filter_table = Table(
-            [[str(random.randint(0,100))] * 3 for _ in range(2)], 
+            [
+                ["2024-07-04 3:00", "user_1", "190"],
+                ["2024-07-08 4:00", "user_1", "20"],
+            ],
             include_outer_lines=True, 
             color=BLACK,
             line_config=l_config,
             col_labels=[Text("timestamp"), Text("user_id"), Text("amount")],
         ).scale(0.3)
         rename_col_table = Table(
-            [[str(random.randint(0,100))] * 3 for _ in range(4)], 
+            [
+                ["2024-07-01 1:00", "user_1", "50"],
+                ["2024-07-04 3:00", "user_1", "190"],
+                ["2024-07-08 4:00", "user_1", "20"],
+                ["2024-07-11 1:00", "user_1", "800"],
+            ],
             include_outer_lines=True, 
             color=BLACK,
             line_config=l_config,
@@ -89,9 +107,9 @@ class NodeWithTables(Scene):
                 Create(right_arrows[i]),
                 Create(arrow_labels[i])
             )
-            self.wait(1)
+            self.wait(2)
 
-        self.wait(2)
+        self.wait(1)
 
         self.play(
             FadeOut(left_table),

@@ -1,6 +1,7 @@
 from manim import *
 
 config.background_color = LOGO_WHITE
+BLACK = GREY_BROWN
 
 class Pipeline(Scene):
     def construct(self):
@@ -14,7 +15,9 @@ class Pipeline(Scene):
         source_to_compute = Arrow(color=BLACK)
         source_to_compute.next_to(source, RIGHT)
 
-        self.add(source)
+        self.play(
+            Create(source)
+        )
         self.wait(2)
 
         db_image = ImageMobject(filename_or_array="assets/db.png").scale(0.7)

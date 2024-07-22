@@ -1,6 +1,7 @@
 from manim import *
 
 config.background_color = LOGO_WHITE
+BLACK = GREY_BROWN
 
 class TransactionTimeline(Scene):
     def construct(self):
@@ -64,6 +65,17 @@ class TransactionTimeline(Scene):
         self.play(Create(timeline))
         
 
+        at = Text(f"anchor_time", font_size=24, font="menlo", color=BLACK).next_to(timeline, DOWN)
+        at_explained = Text(f"The start of the tile interval. Used to uniquely identify individual tiles.", font_size=24, font="futura", color=BLACK).next_to(at, RIGHT)
+        at_group = VGroup(at, at_explained)
+        at_group.move_to(ORIGIN)
+        at_group.shift(DOWN * 3.5)
+
+        self.wait(1)
+        self.play(
+            Write(at_group)
+        )
+
         table = Table(
             [["Day 1: 00:00", "Day 2: 00:00", "Day 3: 00:00", "Day 4: 00:00", "Day 5 00:00"],
             ["50", "110", "140", "20", "5"]],
@@ -102,7 +114,31 @@ class TransactionTimeline(Scene):
             )
 
 
+        self.wait(1)
+        self.play(
+            FadeOut(table)
+        )
 
 
+        et = Text(f"effective_time", font_size=20, font="menlo", color=BLACK).next_to(timeline, DOWN)
+        et_explained = Text(f"The time when a specific feature value will be available in the Online Store.", font_size=20, font="futura", color=BLACK).next_to(et, RIGHT)
+        et_group = VGroup(et, et_explained)
+        et_group.move_to(ORIGIN)
+        et_group.shift(DOWN * 2)
+        self.play(Transform(at_group, et_group))
+
+        schedule = Text(f"Batch Schedule = 1 day", font_size=12, font="menlo", color=BLACK, weight=BOLD).next_to(timeline, UP).shift(LEFT * 5)
+        ts_arrow = Arrow(dot_map[1].get_top() + UP * 1.5, dot_map[1].get_top(), buff=0.1, color=BLACK, stroke_width=2, tip_length=0.15)
+        ts_text = Text(f"Timestamp", font_size=12, font="menlo", color=RED, weight=BOLD).next_to(ts_arrow, UP)
+        self.wait(1)
+        self.play(Create(ts_arrow), Write(ts_text), Write(schedule), run_time=0.5)
 
 
+        et_arrow = Arrow(timeline.number_to_point(2) + UP * 2, timeline.number_to_point(2), buff=0.1, color=BLACK, stroke_width=2, tip_length=0.15)
+        et_text = Text(f"Effective Timestamp", font_size=12, font="menlo", color=GREEN, weight=BOLD).next_to(et_arrow, UP).shift(RIGHT/3)
+
+        self.wait(1)
+        self.play(Create(et_arrow))
+
+        self.wait(1)
+        self.play(Write(et_text), run_time=0.5)
